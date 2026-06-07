@@ -254,8 +254,18 @@
       // NOTE: `Audio` is our engine object above, so we must NOT use
       // `new Audio()` here — create the element explicitly.
       audioEl = document.createElement("audio");
+      audioEl.setAttribute("playsinline", ""); // iOS: don't hijack to fullscreen
+      audioEl.preload = "auto";
       audioEl.addEventListener("ended", goHome);
       document.body.appendChild(audioEl);
+      // iOS: route playback through Web Audio so it plays at full volume and
+      // ignores the hardware silent/mute switch (a bare <audio> obeys it).
+      try {
+        const node = Audio.ctx.createMediaElementSource(audioEl);
+        node.connect(Audio.ctx.destination);
+      } catch (e) {
+        console.warn("MediaElementSource unavailable; using direct playback:", e);
+      }
     }
     return audioEl;
   }

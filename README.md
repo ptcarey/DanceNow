@@ -33,6 +33,16 @@ It's a single self-contained web app — no build step.
 3. In Chrome, tap the menu → **Add to Home screen**. It installs full-screen
    and works offline after the first load.
 
+**On an iPhone/iPad (iOS):**
+
+1. Open the app's URL in **Safari** (it must be Safari to install — see GitHub
+   Pages below for a permanent link).
+2. Tap the **Share** button → **Add to Home Screen**. It opens like a real app
+   (standalone, its own star icon) and works offline after the first load.
+3. Tap a song to start — and check the **side mute switch isn't on** and the
+   volume is up. (Your own songs via *Your Song* are routed so they still play
+   even with the mute switch on; the file picker reads from the **Files** app.)
+
 > Audio starts when you tap a song (browsers require a tap before playing sound).
 
 ### Putting it on the tablet for good (GitHub Pages)
@@ -48,11 +58,10 @@ on GitHub Pages — **one Settings toggle, then it auto-updates on every push**
    > **https://ptcarey.github.io/DanceNow/**
 5. On the tablet in Chrome → **⋮ → Add to Home screen**. Done.
 
-> **Heads-up:** this repo is **private**, and GitHub Pages on a private repo
-> needs a paid plan (Pro/Team). If **Settings → Pages** doesn't offer it, use a
-> fallback below — it's just a kids' dance app, nothing secret.
+> **Note:** this repo is now **public**, so GitHub Pages is free. The same link
+> works for both Android (Chrome) and iOS (Safari) — just "Add to Home Screen".
 
-**Fallbacks if Pages isn't available on your plan:**
+**Other ways to host it (if you prefer):**
 
 - **Make the repo public** (Settings → General → Danger Zone), then do the steps
   above — Pages is free for public repos.
@@ -96,7 +105,10 @@ It's an approximate beat detector — perfect sync isn't the goal, just
 - `index.html` — screens, styles, and the dancer/move UI
 - `app.js` — songs/moves, the Web Audio music engine, beat detection, the beat
   loop, stars, pause, and the "Your Song" file flow
-- `manifest.webmanifest`, `icon.svg`, `sw.js` — make it installable & offline
+- `manifest.webmanifest`, `icon.svg`, `app-icon-*.png`, `sw.js` — make it
+  installable & offline on Android **and** iOS (iOS needs the PNG icons)
+- `tools/gen-icons.mjs` — regenerates the PNG icons (`node tools/gen-icons.mjs`),
+  dependency-free
 
 ## Customising
 

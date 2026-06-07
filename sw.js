@@ -1,10 +1,13 @@
 /* Tiny offline cache so Dance Now! works with no internet. */
-const CACHE = "dancenow-v3";
+const CACHE = "dancenow-v4";
 const ASSETS = [
   "index.html",
   "app.js",
   "icon.svg",
   "manifest.webmanifest",
+  "app-icon-180.png",
+  "app-icon-192.png",
+  "app-icon-512.png",
 ];
 
 self.addEventListener("install", (e) => {
