@@ -37,15 +37,24 @@ It's a single self-contained web app — no build step.
 
 ### Putting it on the tablet for good (GitHub Pages)
 
-For a permanent link you can "Add to Home screen" (full-screen + offline), turn
-on GitHub Pages for this repo — one setting, ~30 seconds:
+This repo includes a GitHub Actions workflow (`.github/workflows/pages.yml`) that
+**auto-deploys to GitHub Pages** on every push to the default branch. If it
+succeeds, the app is live at:
 
-1. GitHub → **Settings → Pages**.
-2. **Build and deployment → Source: _Deploy from a branch_.**
-3. Branch: **`claude/fervent-gauss-jZYNt`**, folder **`/ (root)`** → **Save**.
-4. After a minute the site is live at:
-   **`https://ptcarey.github.io/dancenow/`**
-5. Open that on the tablet in Chrome → **⋮ → Add to Home screen**. Done.
+> **https://ptcarey.github.io/DanceNow/**
+
+Open that on the tablet in Chrome → **⋮ → Add to Home screen** → full-screen,
+offline, tap-to-play.
+
+**If the workflow fails** (GitHub Pages needs a paid plan for *private* repos),
+pick one:
+
+- **Make the repo public**, then re-run the workflow (Actions tab → *Deploy to
+  GitHub Pages* → *Run workflow*). It's just a kids' dance app — nothing secret.
+- **Netlify Drop** — go to <https://app.netlify.com/drop> and drag this folder
+  in. Instant public HTTPS link, no account needed.
+- **Local Wi-Fi** — `python3 -m http.server 8000` here, then open
+  `http://<your-computer-ip>:8000` on the tablet (computer must stay on).
 
 ## Built-in songs
 
