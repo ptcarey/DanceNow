@@ -37,20 +37,25 @@ It's a single self-contained web app — no build step.
 
 ### Putting it on the tablet for good (GitHub Pages)
 
-This repo includes a GitHub Actions workflow (`.github/workflows/pages.yml`) that
-**auto-deploys to GitHub Pages** on every push to the default branch. If it
-succeeds, the app is live at:
+For a permanent link you can "Add to Home screen" (full-screen + offline), turn
+on GitHub Pages — **one Settings toggle, then it auto-updates on every push**
+(no workflow needed):
 
-> **https://ptcarey.github.io/DanceNow/**
+1. GitHub → repo **Settings → Pages**.
+2. **Build and deployment → Source: _Deploy from a branch_.**
+3. Branch: **`claude/fervent-gauss-jZYNt`** · folder **`/ (root)`** → **Save**.
+4. Wait ~1 minute, then open:
+   > **https://ptcarey.github.io/DanceNow/**
+5. On the tablet in Chrome → **⋮ → Add to Home screen**. Done.
 
-Open that on the tablet in Chrome → **⋮ → Add to Home screen** → full-screen,
-offline, tap-to-play.
+> **Heads-up:** this repo is **private**, and GitHub Pages on a private repo
+> needs a paid plan (Pro/Team). If **Settings → Pages** doesn't offer it, use a
+> fallback below — it's just a kids' dance app, nothing secret.
 
-**If the workflow fails** (GitHub Pages needs a paid plan for *private* repos),
-pick one:
+**Fallbacks if Pages isn't available on your plan:**
 
-- **Make the repo public**, then re-run the workflow (Actions tab → *Deploy to
-  GitHub Pages* → *Run workflow*). It's just a kids' dance app — nothing secret.
+- **Make the repo public** (Settings → General → Danger Zone), then do the steps
+  above — Pages is free for public repos.
 - **Netlify Drop** — go to <https://app.netlify.com/drop> and drag this folder
   in. Instant public HTTPS link, no account needed.
 - **Local Wi-Fi** — `python3 -m http.server 8000` here, then open
