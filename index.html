@@ -124,6 +124,42 @@
     .song-card.c2 { background: linear-gradient(150deg, #b8f2a6, #57cc99); }
     .song-card.c3 { background: linear-gradient(150deg, #ffd6a5, #ffaa5a); }
 
+    /* "Your Song" card — full width, distinct dashed look */
+    .song-card.add-card {
+      grid-column: 1 / -1;
+      flex-direction: row;
+      justify-content: center;
+      gap: 12px;
+      color: var(--purple);
+      background: #ffffffd9;
+      border: 4px dashed var(--purple);
+      box-shadow: 0 6px 0 rgba(155,93,229,0.18), 0 10px 16px rgba(0,0,0,0.10);
+    }
+    .song-card.add-card .ico { font-size: clamp(30px, 9vw, 40px); }
+    .song-card.add-card:active {
+      box-shadow: 0 2px 0 rgba(155,93,229,0.18), 0 5px 10px rgba(0,0,0,0.10);
+    }
+
+    /* Toast (status / friendly messages) */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(28px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      background: var(--ink);
+      color: #fff;
+      padding: 14px 22px;
+      border-radius: 999px;
+      font-size: clamp(15px, 4.4vw, 19px);
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      z-index: 90;
+      max-width: 88vw;
+      text-align: center;
+      transition: opacity 0.25s ease;
+    }
+    .toast.hidden { opacity: 0; pointer-events: none; }
+
     .hint {
       font-size: 14px;
       opacity: 0.6;
@@ -303,7 +339,7 @@
       <div class="tagline">Pick a song and let's GO! 🎉</div>
     </div>
     <div id="songGrid" class="song-grid"></div>
-    <div class="hint">Copy the moves and collect stars! Tap ⏸️ Pause any time.</div>
+    <div class="hint">Copy the moves and collect stars! Tap 🎵 <b>Your Song</b> to dance to your own music. ⏸️ Pause any time.</div>
   </section>
 
   <!-- ============ DANCE SCREEN ============ -->
@@ -333,6 +369,9 @@
     <p>Ready for more? Let's dance! 💃</p>
     <button class="big-btn" id="resumeBtn">▶️ Keep Dancing</button>
   </div>
+
+  <!-- ============ TOAST ============ -->
+  <div id="toast" class="toast hidden"></div>
 
   <script src="app.js"></script>
 </body>
