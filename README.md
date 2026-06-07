@@ -69,8 +69,15 @@ on GitHub Pages — **one Settings toggle, then it auto-updates on every push**
 | 🪩 Disco Party | playful & funky | fast |
 | 🌟 Super Star | big, exciting moves | fast |
 | 🌈 Cool Down | gentler wind-down | medium |
+| 🪄 Abracadabra | sparkly, spell-casting | fast (136 BPM) |
 
 …plus **🎵 Your Song** — pick any audio file and the moves sync to its beat.
+
+> **About "Abracadabra":** this is an *original* synthesized track the app plays
+> itself, inspired by and tuned to Lady Gaga's song (136 BPM, F minor) so it
+> feels right — it is **not** the copyrighted recording. To dance to the actual
+> Lady Gaga track, tap **🎵 Your Song** and pick your own audio file; it stays on
+> the device.
 
 ## How "Your Song" works
 

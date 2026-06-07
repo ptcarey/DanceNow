@@ -70,6 +70,18 @@
       pattern: ["sway", "reach", "wave", "bounce"],
       scale: [329.6, 392.0, 440.0, 523.3, 587.3], // a gentler wind-down
     },
+    {
+      // An ORIGINAL synth track inspired by Lady Gaga's "Abracadabra"
+      // (NOT the copyrighted recording). Matched to the real song so it
+      // pairs well: 136 BPM, F minor — F minor pentatonic (F Ab Bb C Eb).
+      // To dance to the actual recording, use the "Your Song" button.
+      name: "Abracadabra",
+      icon: "🪄",
+      bpm: 136,
+      beatsPerMove: 4,
+      pattern: ["reach", "wave", "spin", "jump"], // cast a spell, swirl, leap
+      scale: [349.2, 415.3, 466.2, 523.3, 622.3],
+    },
   ];
 
   /* ---------- Tiny Web Audio engine (for built-in songs + sparkles) ---------- */
