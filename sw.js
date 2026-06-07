@@ -1,8 +1,10 @@
 /* Tiny offline cache so Dance Now! works with no internet. */
-const CACHE = "dancenow-v4";
+const CACHE = "dancenow-v5";
 const ASSETS = [
   "index.html",
   "app.js",
+  "pose.js",
+  "camera-game.js",
   "icon.svg",
   "manifest.webmanifest",
   "app-icon-180.png",

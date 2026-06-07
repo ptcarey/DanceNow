@@ -6,6 +6,11 @@ stars for joining in!
 
 Made to be easy and joyful for little ones:
 
+- **📷 Camera Dance (motion tracking)** — the headline mode: the device camera
+  watches the player and a friendly **avatar** mirrors their moves while an
+  **instructor avatar** demonstrates. Copy the moves on the beat for gentle
+  **Perfect / Good / Okay** scores. Camera frames are processed **on-device** —
+  nothing is uploaded, and the raw video is never shown.
 - **High-energy & playful** — upbeat tempos and big, bouncy moves, with a
   rainbow "Cool Down" song when it's time to wind down.
 - **🎵 Dance to your own music** — a grown-up can tap **Your Song** and pick an
@@ -16,6 +21,36 @@ Made to be easy and joyful for little ones:
 - **No reading needed** — every move is shown with a big emoji.
 - **Private & offline** — no camera, no accounts, no internet. Built-in music is
   made on the device, and your own songs never leave the phone.
+
+## 📷 Camera Dance — how it works
+
+Tap **"Dance with the Camera!"** on the home screen.
+
+1. **Camera permission** — the browser asks to use the front camera (needed to
+   see the dancing). On the **first run only**, a small pose model + engine
+   downloads from a CDN (then it's cached for offline use).
+2. **Stand back** — so the player's arms (and legs, for marching) are in view.
+3. **Clap with me** — a quick calibration learns the player's timing so scoring
+   stays fair despite camera/processing lag.
+4. **Pick a dance** — copy the green **instructor** avatar's move on each beat;
+   the player's gold avatar mirrors them. On time = **Perfect**, close = **Good**,
+   a bit late = **Okay**, missed = a soft gray **"Aww"** (no drama). Stars reward
+   every hit.
+
+Moves detected: **clap**, **wave arms**, **reach up**, and **march** (march needs
+the whole body in frame). It's pure on-device tracking (MediaPipe Pose Landmarker
+in the browser) — **private, nothing uploaded**.
+
+**Requirements & notes:**
+- Needs a **secure context** for the camera — i.e. the **HTTPS GitHub Pages
+  link** (or `localhost`). A plain `http://` LAN address will not grant camera
+  access.
+- **Performance varies by device** — real-time tracking is heavy; it runs well on
+  a modern phone/tablet but can lag on older hardware. If the camera can't start,
+  the game offers the tap-along songs instead.
+- This is a **first version** — the detector thresholds and timing windows (all
+  in `CFG` at the top of `camera-game.js`) are expected to need a tuning pass once
+  it's tried on the real device.
 
 ## How to run it
 
@@ -102,9 +137,12 @@ It's an approximate beat detector — perfect sync isn't the goal, just
 
 ## Files
 
-- `index.html` — screens, styles, and the dancer/move UI
-- `app.js` — songs/moves, the Web Audio music engine, beat detection, the beat
-  loop, stars, pause, and the "Your Song" file flow
+- `index.html` — screens, styles, the dancer/move UI, and the camera-game shell
+- `app.js` — the tap-along mode: songs/moves, the Web Audio music engine, beat
+  detection, the beat loop, stars, pause, and the "Your Song" file flow
+- `pose.js` — on-device body tracking (MediaPipe Pose Landmarker + camera)
+- `camera-game.js` — the Camera Dance mode: choreography, instructor + player
+  avatars, clap calibration, and gentle scoring (tunable `CFG` at the top)
 - `manifest.webmanifest`, `icon.svg`, `app-icon-*.png`, `sw.js` — make it
   installable & offline on Android **and** iOS (iOS needs the PNG icons)
 - `tools/gen-icons.mjs` — regenerates the PNG icons (`node tools/gen-icons.mjs`),

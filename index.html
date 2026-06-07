@@ -328,7 +328,117 @@
     @media (prefers-reduced-motion: reduce) {
       .dancer, .blob { animation-duration: 3s !important; }
     }
+
+    /* ===================== Camera game ===================== */
+    .camera-cta {
+      width: min(520px, 92vw);
+      border: none;
+      border-radius: 26px;
+      padding: 18px 16px;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(18px, 5.4vw, 24px);
+      color: #fff;
+      background: linear-gradient(135deg, #ff5d8f, #9b5de5, #4cc9f0);
+      box-shadow: 0 8px 0 rgba(0,0,0,0.14), 0 14px 22px rgba(0,0,0,0.18);
+      cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .camera-cta:active { transform: translateY(6px); box-shadow: 0 2px 0 rgba(0,0,0,0.14); }
+    .camera-cta small { font-weight: 600; font-size: 0.62em; opacity: 0.92; }
+
+    .cam-root {
+      position: fixed; inset: 0; z-index: 100;
+      background: linear-gradient(160deg, #1b1030, #2a1a4a 55%, #10243a);
+      color: #fff; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+    .cam-root.hidden { display: none; }
+
+    /* hidden source video — we render an avatar, never the raw camera */
+    #camVideo { position: absolute; width: 2px; height: 2px; opacity: 0; pointer-events: none; left: -10px; top: -10px; }
+
+    .cam-stage { flex: 1; position: relative; display: flex; flex-direction: column; }
+    .cam-instructor, .cam-player { position: relative; flex: 1; }
+    .cam-instructor { border-bottom: 2px dashed rgba(255,255,255,0.18); }
+    .cam-instructor canvas, .cam-player canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .cam-tag {
+      position: absolute; top: 8px; left: 12px; z-index: 2;
+      font-weight: 800; font-size: clamp(13px, 3.6vw, 16px);
+      background: rgba(0,0,0,0.28); padding: 4px 12px; border-radius: 999px;
+    }
+    .cam-player .cam-tag { color: #ffd166; }
+    .cam-instructor .cam-tag { color: #80ed99; }
+
+    .cam-topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: max(10px, env(safe-area-inset-top)) 12px 8px;
+    }
+    .cam-pill {
+      background: rgba(255,255,255,0.14); border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 999px; padding: 7px 14px; font-weight: 800;
+      font-size: clamp(14px, 4vw, 18px);
+    }
+    .cam-iconbtn {
+      border: none; background: rgba(255,255,255,0.16); border: 2px solid rgba(255,255,255,0.28);
+      color: #fff; width: 48px; height: 48px; border-radius: 999px; font-size: 22px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cam-iconbtn:active { transform: scale(0.92); }
+
+    .cam-move {
+      position: absolute; top: 6px; left: 50%; transform: translateX(-50%); z-index: 3;
+      text-align: center; font-weight: 800; font-size: clamp(20px, 6vw, 30px);
+      text-shadow: 0 2px 6px rgba(0,0,0,0.4); pointer-events: none; white-space: nowrap;
+    }
+    .cam-beats { display: flex; gap: 10px; justify-content: center; padding: 6px 0 10px; }
+    .cam-beats .beat-dot { width: 14px; height: 14px; border-radius: 50%; background: rgba(255,255,255,0.25); border: 2px solid rgba(255,255,255,0.5); }
+    .cam-beats .beat-dot.on { background: #ffd166; border-color: #ffd166; transform: scale(1.4); }
+
+    /* Feedback popup */
+    .cam-feedback {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(1);
+      z-index: 5; font-weight: 900; pointer-events: none;
+      font-size: clamp(34px, 12vw, 72px); opacity: 0;
+    }
+    .cam-feedback.show { animation: fbpop 0.9s ease-out; }
+    @keyframes fbpop {
+      0% { opacity: 0; transform: translate(-50%,-50%) scale(0.5); }
+      25% { opacity: 1; transform: translate(-50%,-50%) scale(1.12); }
+      75% { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%,-58%) scale(1); }
+    }
+    .fb-perfect { color: #ffd166; text-shadow: 0 0 18px rgba(255,209,102,0.8); }
+    .fb-good    { color: #80ed99; }
+    .fb-okay    { color: #7bdff2; }
+    .fb-aww     { color: #9aa0b5; font-size: clamp(24px, 8vw, 44px); } /* small, gray, gentle */
+
+    /* Status / calibration overlays */
+    .cam-overlay {
+      position: absolute; inset: 0; z-index: 10;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 20px; text-align: center; padding: 24px;
+      background: rgba(10,6,24,0.7); backdrop-filter: blur(3px);
+    }
+    .cam-overlay.hidden { display: none; }
+    .cam-overlay .big { font-size: clamp(54px, 16vw, 96px); }
+    .cam-overlay h2 { margin: 0; font-size: clamp(24px, 7vw, 38px); }
+    .cam-overlay p { margin: 0; font-size: clamp(15px, 4.6vw, 20px); opacity: 0.9; max-width: 340px; }
+    .cam-btn {
+      border: none; border-radius: 999px; padding: 15px 28px; font-family: inherit;
+      font-weight: 800; font-size: clamp(17px, 5vw, 22px); color: #fff; cursor: pointer;
+      background: linear-gradient(150deg, #ff5d8f, #9b5de5); box-shadow: 0 6px 0 rgba(0,0,0,0.25);
+    }
+    .cam-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+    .cam-btn.ghost { background: rgba(255,255,255,0.16); border: 2px solid rgba(255,255,255,0.3); box-shadow: none; }
+    .cam-spinner {
+      width: 54px; height: 54px; border-radius: 50%;
+      border: 6px solid rgba(255,255,255,0.25); border-top-color: #ffd166;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
+
 </head>
 <body>
   <div class="blob b1"></div>
@@ -342,6 +452,7 @@
       <div class="logo">Dance <span class="emoji">💃</span><br/>Now!</div>
       <div class="tagline">Pick a song and let's GO! 🎉</div>
     </div>
+    <button id="cameraCta" class="camera-cta">📷 Dance with the Camera!<small>Copy the moves — the camera cheers you on</small></button>
     <div id="songGrid" class="song-grid"></div>
     <div class="hint">Copy the moves and collect stars! Tap 🎵 <b>Your Song</b> to dance to your own music. ⏸️ Pause any time.</div>
   </section>
@@ -377,6 +488,10 @@
   <!-- ============ TOAST ============ -->
   <div id="toast" class="toast hidden"></div>
 
+  <!-- ============ CAMERA GAME (built by camera-game.js) ============ -->
+  <div id="cameraGame" class="cam-root hidden"></div>
+
   <script src="app.js"></script>
+  <script type="module" src="camera-game.js"></script>
 </body>
 </html>
