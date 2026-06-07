@@ -16,14 +16,15 @@
   /* ---------- Move vocabulary (gentle, low-intensity) ---------- */
   // `cls` maps to a CSS animation class on the dancer.
   const MOVES = {
-    sway:   { text: "Sway",       emoji: "〰️", cls: "m-sway",   dancer: "🕺" },
-    wave:   { text: "Wave!",      emoji: "👋", cls: "m-wiggle", dancer: "🙋" },
-    clap:   { text: "Clap clap",  emoji: "👏", cls: "m-clap",   dancer: "👏" },
-    reach:  { text: "Reach up!",  emoji: "🙌", cls: "m-reach",  dancer: "🙆" },
-    bounce: { text: "Bounce",     emoji: "⤴️", cls: "m-bounce", dancer: "🧒" },
-    spin:   { text: "Slow spin",  emoji: "🌀", cls: "m-spin",   dancer: "💃" },
-    wiggle: { text: "Wiggle",     emoji: "🪩", cls: "m-wiggle", dancer: "🕺" },
-    rest:   { text: "Soft & slow",emoji: "🫧", cls: "m-sway",   dancer: "😌" },
+    jump:   { text: "Jump!",       emoji: "🦘", cls: "m-jump",   dancer: "🤸" },
+    spin:   { text: "Spin!",       emoji: "🌀", cls: "m-twirl",  dancer: "💃" },
+    clap:   { text: "Clap clap!",  emoji: "👏", cls: "m-clap",   dancer: "🙌" },
+    stomp:  { text: "Stomp!",      emoji: "👣", cls: "m-stomp",  dancer: "🕺" },
+    wave:   { text: "Big wave!",   emoji: "👋", cls: "m-wiggle", dancer: "🙋" },
+    wiggle: { text: "Wiggle!",     emoji: "🪩", cls: "m-wiggle", dancer: "🕺" },
+    reach:  { text: "Reach high!", emoji: "🙌", cls: "m-reach",  dancer: "🙆" },
+    bounce: { text: "Bounce!",     emoji: "⤴️", cls: "m-bounce", dancer: "💃" },
+    sway:   { text: "Sway",        emoji: "〰️", cls: "m-sway",   dancer: "🕺" },
   };
 
   /* ---------- Songs ----------
@@ -31,36 +32,36 @@
      lasts `beatsPerMove` beats. `scale` = note pool (Hz) for the melody. */
   const SONGS = [
     {
-      name: "Happy Bounce",
-      icon: "🌟",
-      bpm: 92,
+      name: "Jump Around",
+      icon: "🦘",
+      bpm: 128,
       beatsPerMove: 4,
-      pattern: ["bounce", "clap", "wave", "rest"],
-      scale: [392.0, 440.0, 493.9, 587.3, 659.3], // G A B D E (major pentatonic)
+      pattern: ["jump", "clap", "spin", "stomp"],
+      scale: [392.0, 440.0, 493.9, 587.3, 659.3], // bright major pentatonic
     },
     {
-      name: "Ocean Sway",
-      icon: "🌊",
-      bpm: 76,
-      beatsPerMove: 4,
-      pattern: ["sway", "reach", "sway", "rest"],
-      scale: [329.6, 392.0, 440.0, 523.3, 587.3], // calm, airy
-    },
-    {
-      name: "Wiggle Time",
+      name: "Disco Party",
       icon: "🪩",
-      bpm: 100,
+      bpm: 120,
       beatsPerMove: 4,
-      pattern: ["wiggle", "clap", "spin", "wave"],
+      pattern: ["wiggle", "spin", "clap", "jump"],
       scale: [440.0, 523.3, 587.3, 659.3, 783.9],
     },
     {
-      name: "Sleepy Stars",
-      icon: "🌙",
-      bpm: 66,
+      name: "Super Star",
+      icon: "🌟",
+      bpm: 124,
       beatsPerMove: 4,
-      pattern: ["rest", "reach", "sway", "rest"],
-      scale: [261.6, 329.6, 392.0, 440.0, 523.3], // very calm
+      pattern: ["reach", "bounce", "wave", "spin"],
+      scale: [523.3, 587.3, 659.3, 783.9, 880.0], // high & exciting
+    },
+    {
+      name: "Cool Down",
+      icon: "🌈",
+      bpm: 90,
+      beatsPerMove: 4,
+      pattern: ["sway", "reach", "wave", "bounce"],
+      scale: [329.6, 392.0, 440.0, 523.3, 587.3], // a gentler wind-down
     },
   ];
 
@@ -209,16 +210,13 @@
     const inBar = i % 4;
     // Soft kick on every beat; downbeat a touch stronger.
     Audio.beat(t, inBar !== 0);
-    // Sprinkle melody notes from the song's scale on most beats.
-    const move = currentMove(i);
-    const restful = move === MOVES.rest;
-    if (!restful || inBar === 0) {
-      const pool = current.scale;
-      const freq = pool[(i * 2 + inBar) % pool.length];
-      Audio.note(freq, t, restful ? 0.7 : 0.45, restful ? 0.35 : 0.5);
-      // A gentle harmony on the downbeat.
-      if (inBar === 0) Audio.note(freq * 1.5, t + 0.02, 0.5, 0.25);
-    }
+    // Bouncy melody notes from the song's scale on every beat.
+    const pool = current.scale;
+    const freq = pool[(i * 2 + inBar) % pool.length];
+    Audio.note(freq, t, 0.4, 0.5);
+    // A bright harmony on the downbeat, plus a little off-beat sparkle note.
+    if (inBar === 0) Audio.note(freq * 1.5, t + 0.02, 0.45, 0.28);
+    Audio.note(freq * 2, t + beatDur / 2, 0.18, 0.18); // off-beat "& " bounce
   }
 
   function currentMove(i) {

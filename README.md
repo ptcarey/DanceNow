@@ -1,16 +1,15 @@
 # Dance Now! 💃
 
-A simple, gentle **dance-along app for a young child**. Pick a song, follow the
-friendly dancer and the big move prompts, and collect sparkly stars just for
-joining in.
+A fun, **energetic dance-along app for a young child**. Pick a song, copy the
+friendly dancer's big moves — jump, spin, stomp, clap — and collect sparkly
+stars for joining in!
 
-Designed to be safe and kind for little ones — including a child with a heart
-condition (CHD):
+Made to be easy and joyful for little ones:
 
-- **Gentle by design** — relaxed tempos, lots of soft "rest" beats, and a big
-  **💜 Rest** button that pauses everything with a calm breathing prompt.
+- **High-energy & playful** — upbeat tempos and big, bouncy moves, with a
+  rainbow "Cool Down" song when it's time to wind down.
 - **No pressure** — there is no score and no way to "lose". Stars are given just
-  for taking part.
+  for taking part, and there's a big **⏸️ Pause** button any time.
 - **No reading needed** — every move is shown with a big emoji.
 - **Private & offline** — no camera, no accounts, no internet. Music is made
   on the device, so there are no files to download and nothing leaves the phone.
@@ -37,10 +36,10 @@ It's a single self-contained web app — no build step.
 
 | Song | Feel | Tempo |
 |------|------|-------|
-| 🌟 Happy Bounce | upbeat, bouncy | medium |
-| 🌊 Ocean Sway | calm, swaying | slow |
-| 🪩 Wiggle Time | playful | livelier |
-| 🌙 Sleepy Stars | very calm wind-down | slowest |
+| 🦘 Jump Around | bouncy & high-energy | fast |
+| 🪩 Disco Party | playful & funky | fast |
+| 🌟 Super Star | big, exciting moves | fast |
+| 🌈 Cool Down | gentler wind-down | medium |
 
 ## Files
 
@@ -54,5 +53,5 @@ It's a single self-contained web app — no build step.
   `beatsPerMove`, a `pattern` of move keys, and a `scale` of note frequencies).
 - **Add a move:** add an entry to `MOVES` with `text`, `emoji`, a dancer emoji,
   and a CSS animation class (`cls`) — see the `@keyframes` in `index.html`.
-- **Make it gentler/livelier:** lower/raise the `bpm` values and use more `rest`
-  beats in a song's `pattern`.
+- **Make it livelier/gentler:** raise/lower the `bpm` values and choose bigger
+  or softer moves in a song's `pattern`.
