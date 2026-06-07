@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#ff6ec7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Dance Now!</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <style>
+    :root {
+      --pink: #ff6ec7;
+      --purple: #9b5de5;
+      --blue: #4cc9f0;
+      --yellow: #ffd166;
+      --green: #80ed99;
+      --ink: #2b2d42;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Comic Sans MS", "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+      color: var(--ink);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    body {
+      background: linear-gradient(160deg, #fff0f9 0%, #eef6ff 50%, #f3fff2 100%);
+    }
+
+    /* Floating background blobs */
+    .blob {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(8px);
+      opacity: 0.35;
+      pointer-events: none;
+      animation: float 8s ease-in-out infinite;
+    }
+    .blob.b1 { width: 180px; height: 180px; background: var(--pink);   top: -40px;  left: -30px; }
+    .blob.b2 { width: 140px; height: 140px; background: var(--blue);   bottom: 8%;  right: -20px; animation-delay: -2s; }
+    .blob.b3 { width: 120px; height: 120px; background: var(--yellow); top: 18%;    right: 10%;  animation-delay: -4s; }
+    .blob.b4 { width: 160px; height: 160px; background: var(--green);  bottom: -30px; left: 12%; animation-delay: -6s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50%      { transform: translateY(-22px) scale(1.06); }
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+      gap: 18px;
+      transition: opacity 0.35s ease;
+    }
+    .screen.hidden { opacity: 0; pointer-events: none; }
+
+    /* ---------- HOME ---------- */
+    .logo {
+      font-size: clamp(40px, 11vw, 76px);
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.05;
+      background: linear-gradient(90deg, var(--pink), var(--purple), var(--blue));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 3px 0 rgba(0,0,0,0.06));
+    }
+    .logo .emoji { -webkit-text-fill-color: initial; }
+
+    .tagline {
+      font-size: clamp(15px, 4.2vw, 20px);
+      opacity: 0.75;
+      text-align: center;
+      margin-top: -6px;
+    }
+
+    .song-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      width: min(520px, 92vw);
+    }
+
+    .song-card {
+      border: none;
+      border-radius: 26px;
+      padding: 18px 12px 16px;
+      color: #fff;
+      font-family: inherit;
+      font-size: clamp(16px, 4.6vw, 21px);
+      font-weight: 800;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 8px 0 rgba(0,0,0,0.12), 0 14px 22px rgba(0,0,0,0.16);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .song-card:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.12), 0 6px 12px rgba(0,0,0,0.16);
+    }
+    .song-card .ico { font-size: clamp(40px, 12vw, 60px); line-height: 1; }
+    .song-card.c0 { background: linear-gradient(150deg, #ff8fb1, #ff5d8f); }
+    .song-card.c1 { background: linear-gradient(150deg, #7bdff2, #4895ef); }
+    .song-card.c2 { background: linear-gradient(150deg, #b8f2a6, #57cc99); }
+    .song-card.c3 { background: linear-gradient(150deg, #ffd6a5, #ffaa5a); }
+
+    .hint {
+      font-size: 14px;
+      opacity: 0.6;
+      text-align: center;
+      max-width: 320px;
+    }
+
+    /* ---------- DANCE ---------- */
+    #danceScreen { justify-content: space-between; }
+
+    .topbar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .pill {
+      background: #ffffffcc;
+      border: 3px solid #ffffff;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-weight: 800;
+      font-size: clamp(15px, 4.4vw, 19px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.10);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      border: none;
+      background: #ffffffcc;
+      border: 3px solid #fff;
+      border-radius: 999px;
+      width: 54px;
+      height: 54px;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn:active { transform: scale(0.92); }
+
+    .stage {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .dancer {
+      font-size: clamp(110px, 38vw, 220px);
+      line-height: 1;
+      will-change: transform;
+      filter: drop-shadow(0 14px 14px rgba(0,0,0,0.18));
+    }
+
+    .move-label {
+      font-size: clamp(28px, 9vw, 52px);
+      font-weight: 800;
+      text-align: center;
+      color: var(--purple);
+      text-shadow: 0 2px 0 #fff;
+      min-height: 1.2em;
+    }
+    .move-emoji { font-size: clamp(34px, 11vw, 64px); }
+
+    /* Beat dots */
+    .beats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .beat-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3px solid var(--purple);
+      transition: transform 0.1s ease, background 0.1s ease;
+    }
+    .beat-dot.on { background: var(--yellow); transform: scale(1.5); }
+
+    .big-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 16px 30px;
+      font-family: inherit;
+      font-size: clamp(18px, 5.5vw, 24px);
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(150deg, var(--pink), var(--purple));
+      box-shadow: 0 7px 0 rgba(0,0,0,0.16), 0 12px 18px rgba(0,0,0,0.18);
+      cursor: pointer;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .big-btn:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(0,0,0,0.16); }
+
+    /* Star reward burst */
+    .star {
+      position: fixed;
+      font-size: 30px;
+      pointer-events: none;
+      animation: pop 1s ease-out forwards;
+      z-index: 50;
+    }
+    @keyframes pop {
+      0%   { transform: translate(0,0) scale(0.4) rotate(0deg); opacity: 1; }
+      100% { transform: translate(var(--dx), var(--dy)) scale(1.4) rotate(var(--rot)); opacity: 0; }
+    }
+
+    /* Rest overlay */
+    .rest-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(43,45,66,0.55);
+      backdrop-filter: blur(4px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      color: #fff;
+      text-align: center;
+      z-index: 80;
+    }
+    .rest-overlay.hidden { display: none; }
+    .rest-overlay .big-heart { font-size: 90px; animation: heartbeat 1.4s ease-in-out infinite; }
+    .rest-overlay h2 { font-size: clamp(26px, 8vw, 40px); margin: 0; }
+    .rest-overlay p { font-size: clamp(16px, 4.6vw, 20px); margin: 0; opacity: 0.9; max-width: 300px; }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      25%      { transform: scale(1.18); }
+      40%      { transform: scale(1); }
+    }
+
+    /* ---------- Dance move animations on the dancer ---------- */
+    .dancer.m-bounce { animation: d-bounce var(--beat) ease-in-out infinite; }
+    .dancer.m-sway   { animation: d-sway   calc(var(--beat) * 2) ease-in-out infinite; }
+    .dancer.m-spin   { animation: d-spin   calc(var(--beat) * 2) linear infinite; }
+    .dancer.m-wiggle { animation: d-wiggle var(--beat) ease-in-out infinite; }
+    .dancer.m-reach  { animation: d-reach  calc(var(--beat) * 2) ease-in-out infinite; }
+    .dancer.m-clap   { animation: d-clap   var(--beat) ease-in-out infinite; }
+
+    @keyframes d-bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-26px) scale(1.05)} }
+    @keyframes d-sway   { 0%,100%{transform:rotate(-12deg) translateX(-10px)} 50%{transform:rotate(12deg) translateX(10px)} }
+    @keyframes d-spin   { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+    @keyframes d-wiggle { 0%,100%{transform:rotate(-8deg)} 25%{transform:rotate(8deg)} 50%{transform:rotate(-8deg)} 75%{transform:rotate(8deg)} }
+    @keyframes d-reach  { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-18px) scale(1.12)} }
+    @keyframes d-clap   { 0%,100%{transform:scale(1)} 50%{transform:scale(0.9) translateY(6px)} }
+
+    @media (prefers-reduced-motion: reduce) {
+      .dancer, .blob { animation-duration: 3s !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="blob b4"></div>
+
+  <!-- ============ HOME SCREEN ============ -->
+  <section id="homeScreen" class="screen">
+    <div>
+      <div class="logo">Dance <span class="emoji">💃</span><br/>Now!</div>
+      <div class="tagline">Pick a song and dance along! 🌈</div>
+    </div>
+    <div id="songGrid" class="song-grid"></div>
+    <div class="hint">Move gently and have fun. Tap 💜 Rest any time you need a break.</div>
+  </section>
+
+  <!-- ============ DANCE SCREEN ============ -->
+  <section id="danceScreen" class="screen hidden">
+    <div class="topbar">
+      <button class="icon-btn" id="homeBtn" aria-label="Back home">🏠</button>
+      <div class="pill"><span id="songName">Song</span></div>
+      <div class="pill">⭐ <span id="starCount">0</span></div>
+    </div>
+
+    <div class="stage">
+      <div class="beats" id="beats">
+        <div class="beat-dot"></div><div class="beat-dot"></div>
+        <div class="beat-dot"></div><div class="beat-dot"></div>
+      </div>
+      <div class="dancer" id="dancer">🕺</div>
+      <div class="move-label"><span class="move-emoji" id="moveEmoji">👋</span> <span id="moveText">Get ready!</span></div>
+    </div>
+
+    <button class="big-btn" id="restBtn">💜 Rest</button>
+  </section>
+
+  <!-- ============ REST OVERLAY ============ -->
+  <div id="restOverlay" class="rest-overlay hidden">
+    <div class="big-heart">💜</div>
+    <h2>Take a little rest</h2>
+    <p>Breathe in… and out… You're doing great. Tap when you're ready!</p>
+    <button class="big-btn" id="resumeBtn">▶️ Keep Dancing</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
