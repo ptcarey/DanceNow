@@ -253,13 +253,10 @@
       Audio.init();
       Audio.resume();
       stopSong();
-      showToast("Listening to the beat… 🎧");
 
-      const arrayBuf = await file.arrayBuffer();
-      const audioBuf = await Audio.ctx.decodeAudioData(arrayBuf);
-      const bpm = await detectBpm(audioBuf);
-      hideToast();
-
+      // Start playback FIRST, while we still have the user's tap "activation".
+      // Beat detection can take a moment, and on a phone that delay could push
+      // play() past the activation window and get the audio blocked.
       const el = getAudioEl();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
       objectUrl = URL.createObjectURL(file);
@@ -267,7 +264,7 @@
 
       current = {
         name: prettyName(file.name),
-        bpm,
+        bpm: 120,            // provisional tempo until detection refines it
         beatsPerMove: 4,
         pattern: FILE_PATTERN,
         isFile: true,
@@ -278,11 +275,17 @@
       show(danceScreen);
       setMoveForBeat(0);
 
-      await el.play();
-      fileLoop();
+      await el.play();       // music starts right away
+      fileLoop();            // dance at the provisional tempo immediately
+
+      // Refine the tempo in the background and update the pace when ready.
+      file.arrayBuffer()
+        .then((buf) => Audio.ctx.decodeAudioData(buf))
+        .then((audioBuf) => detectBpm(audioBuf))
+        .then((bpm) => { if (current && current.isFile) current.bpm = bpm; })
+        .catch((e) => console.warn("Tempo detection failed, keeping 120 BPM:", e));
     } catch (err) {
       console.warn("Could not load song:", err);
-      hideToast();
       showToast("Hmm, couldn't play that song. Try another! 🎵", 2600);
       current = null;
       show(homeScreen);
