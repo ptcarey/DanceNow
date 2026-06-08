@@ -6,7 +6,7 @@
    - Other assets: cache-first, then network (and cache the result).
    The install is resilient: one missing file can't block the update. */
 
-const CACHE = "dancenow-v7";
+const CACHE = "dancenow-v8";
 const ASSETS = [
   "index.html",
   "app.js",

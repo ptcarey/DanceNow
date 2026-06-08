@@ -57,28 +57,47 @@ const VIEW_W = 400, VIEW_H = 700;
 class Character {
   constructor() { this.parts = {}; this.ready = false; this.failed = false; }
 
-  async load(url) {
+  // Load by name: prefer a PNG-parts manifest (name.json), else an SVG (name.svg).
+  async loadAny(name, base) {
+    const jsonUrl = new URL(`${name}.json`, base).href;
+    try {
+      const res = await fetch(jsonUrl);
+      if (res.ok) { await this.loadManifest(await res.json(), jsonUrl); return; }
+    } catch (e) { /* no manifest — fall through to SVG */ }
+    await this.loadSvg(new URL(`${name}.svg`, base).href);
+  }
+
+  // Build rest bones (proximal/distal anchors) for every part from an anchor map.
+  _restBones(anchors) {
+    if (anchors["anchor-neck"]) {
+      anchors["__head_top__"] = { x: anchors["anchor-neck"].x, y: anchors["anchor-neck"].y - 57 };
+    }
+    const rest = {};
+    for (const id of DRAW_ORDER) {
+      const [a, b] = REST_BONES[id];
+      if (anchors[a] && anchors[b]) rest[id] = [anchors[a], anchors[b]];
+    }
+    return rest;
+  }
+
+  async loadSvg(url) {
     try {
       const text = await (await fetch(url)).text();
       const doc = new DOMParser().parseFromString(text, "image/svg+xml");
       if (doc.querySelector("parsererror")) throw new Error("SVG parse error");
 
-      // anchor coordinates
       const anchors = {};
       doc.querySelectorAll('[id^="anchor-"]').forEach((el) => {
         anchors[el.id] = { x: parseFloat(el.getAttribute("cx")), y: parseFloat(el.getAttribute("cy")) };
       });
-      if (anchors["anchor-neck"]) {
-        anchors["__head_top__"] = { x: anchors["anchor-neck"].x, y: anchors["anchor-neck"].y - 57 };
-      }
+      const rest = this._restBones(anchors);
 
       const serializer = new XMLSerializer();
       const loads = [];
       for (const id of DRAW_ORDER) {
         const g = doc.getElementById(id);
-        const [a, b] = REST_BONES[id];
-        if (!g || !anchors[a] || !anchors[b]) continue;
-        // standalone SVG containing just this part
+        if (!g || !rest[id]) continue;
+        // standalone SVG containing just this part (drawn at its rest position)
         const svg =
           `<svg xmlns="http://www.w3.org/2000/svg" width="${VIEW_W}" height="${VIEW_H}" viewBox="0 0 ${VIEW_W} ${VIEW_H}">` +
           serializer.serializeToString(g) + `</svg>`;
@@ -86,12 +105,42 @@ class Character {
         const p = new Promise((res) => { img.onload = res; img.onerror = res; });
         img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
         loads.push(p);
-        this.parts[id] = { img, rest: [anchors[a], anchors[b]] };
+        this.parts[id] = { img, rest: rest[id], x: 0, y: 0, w: VIEW_W, h: VIEW_H };
       }
       await Promise.all(loads);
       this.ready = Object.keys(this.parts).length > 0;
     } catch (e) {
-      console.warn("Avatar load failed for", url, e);
+      console.warn("Avatar SVG load failed for", url, e);
+      this.failed = true;
+    }
+  }
+
+  // PNG-parts manifest: { anchors:{id:[x,y]}, parts:{ part-id:{src,x,y,w,h} } }
+  // Each part PNG is the trimmed art placed at (x,y) in the 400x700 viewBox.
+  async loadManifest(man, baseUrl) {
+    try {
+      const anchors = {};
+      for (const k in (man.anchors || {})) anchors[k] = { x: man.anchors[k][0], y: man.anchors[k][1] };
+      const rest = this._restBones(anchors);
+      const loads = [];
+      for (const id of DRAW_ORDER) {
+        const pd = man.parts && man.parts[id];
+        if (!pd || !rest[id]) continue;
+        const img = new Image();
+        const p = new Promise((res) => { img.onload = res; img.onerror = res; });
+        img.src = new URL(pd.src, baseUrl).href;
+        loads.push(p);
+        this.parts[id] = { img, rest: rest[id], x: pd.x || 0, y: pd.y || 0, w: pd.w || 0, h: pd.h || 0 };
+      }
+      await Promise.all(loads);
+      for (const id in this.parts) {
+        const pt = this.parts[id];
+        if (!pt.w) pt.w = pt.img.naturalWidth;
+        if (!pt.h) pt.h = pt.img.naturalHeight;
+      }
+      this.ready = Object.keys(this.parts).length > 0;
+    } catch (e) {
+      console.warn("Avatar manifest load failed", e);
       this.failed = true;
     }
   }
@@ -122,7 +171,7 @@ class Character {
       ctx.rotate(ang);
       ctx.scale(s, s);
       ctx.translate(-R0.x, -R0.y);
-      ctx.drawImage(part.img, 0, 0, VIEW_W, VIEW_H);
+      ctx.drawImage(part.img, part.x, part.y, part.w, part.h);
       ctx.restore();
     }
     return true;
@@ -133,7 +182,7 @@ const cache = {};
 export function loadAvatar(name) {
   if (cache[name]) return cache[name];
   const c = new Character();
-  c.load(new URL(`${name}.svg`, import.meta.url).href);
+  c.loadAny(name, import.meta.url);   // tries name.json (PNG parts) then name.svg
   cache[name] = c;
   return c;
 }
