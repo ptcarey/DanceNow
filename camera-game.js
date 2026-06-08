@@ -258,6 +258,8 @@ let els = {};
 let smoothJ = null;        // smoothed player joints
 let playerChar = null;     // puppet-rig characters (fall back to stick figure)
 let instructorChar = null;
+let playerCharName = "girl";
+try { playerCharName = localStorage.getItem("dancePlayerChar") || "girl"; } catch (e) { /* ignore */ }
 let stars = 0;
 let song = SONGS[0];
 let paused = false;
@@ -299,7 +301,23 @@ function loadCalibration() {
   if (isFinite(v) && v > 0) cal.offset = v;
 }
 function saveCalibration() {
-  localStorage.setItem("danceCalibOffset", String(Math.round(cal.offset)));
+  try { localStorage.setItem("danceCalibOffset", String(Math.round(cal.offset))); } catch (e) { /* ignore */ }
+}
+
+/* ---------- Character selection ---------- */
+const CHARACTERS = [["girl", "Girl"], ["boy", "Boy"]];
+function setCharacter(name) {
+  playerCharName = name;
+  try { localStorage.setItem("dancePlayerChar", name); } catch (e) { /* ignore */ }
+  playerChar = loadAvatar(name);                                  // the player's avatar ("you")
+  instructorChar = loadAvatar(name === "girl" ? "boy" : "girl");  // instructor = the other one
+}
+function selectCharacter(name) {
+  setCharacter(name);
+  if (els.charPick) {
+    els.charPick.querySelectorAll(".cam-charpick").forEach((b) =>
+      b.classList.toggle("selected", b.dataset.char === name));
+  }
 }
 
 /* ---------- Drawing both avatars ---------- */
@@ -405,9 +423,7 @@ async function launch() {
   showOverlay("ovLoading");
   Sound.init(); Sound.resume();
   loadCalibration();
-  // kick off avatar loading (player = girl "you", instructor = boy)
-  if (!playerChar) playerChar = loadAvatar("girl");
-  if (!instructorChar) instructorChar = loadAvatar("boy");
+  setCharacter(playerCharName); // load player + instructor avatars per saved choice
   try {
     await tracker.init();
     await tracker.startCamera(els.camVideo);
@@ -633,8 +649,9 @@ function buildDom() {
       <button class="cam-btn ghost" id="calibSkip">Skip</button>
     </div>
     <div class="cam-overlay hidden" id="ovSongs">
-      <div class="big">🎶</div>
-      <h2>Pick a dance!</h2>
+      <div class="big" style="font-size:clamp(34px,10vw,56px)">🎶</div>
+      <h2>Choose you, then a dance!</h2>
+      <div id="charPick" class="cam-charpick-row"></div>
       <div id="songButtons" style="display:flex;flex-direction:column;gap:12px;width:min(360px,82vw);"></div>
     </div>
     <div class="cam-overlay hidden" id="ovPaused">
@@ -660,6 +677,7 @@ function buildDom() {
     errMsg: $("errMsg"),
     ovLoading: $("ovLoading"), ovError: $("ovError"), ovPosition: $("ovPosition"),
     ovCalib: $("ovCalib"), ovSongs: $("ovSongs"), ovPaused: $("ovPaused"),
+    charPick: $("charPick"),
   };
 
   // wire controls
@@ -671,6 +689,17 @@ function buildDom() {
   $("errClassic").addEventListener("click", quit);
   $("posSkip").addEventListener("click", startCalibration);
   $("calibSkip").addEventListener("click", () => { stopBeats(); chooseSong(); });
+
+  // character picker (tap your avatar; instructor uses the other)
+  const cp = $("charPick");
+  CHARACTERS.forEach(([id, label]) => {
+    const b = document.createElement("button");
+    b.className = "cam-charpick" + (id === playerCharName ? " selected" : "");
+    b.dataset.char = id;
+    b.innerHTML = `<img src="${id}.svg" alt="${label}"/><span>${label}</span>`;
+    b.addEventListener("click", () => selectCharacter(id));
+    cp.appendChild(b);
+  });
 
   // song buttons
   const sb = $("songButtons");
