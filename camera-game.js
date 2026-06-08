@@ -15,6 +15,7 @@
    ============================================================ */
 
 import { PoseTracker, LM } from "./pose.js";
+import { loadAvatar } from "./avatars.js";
 
 /* ---------- Tunable settings ---------- */
 const CFG = {
@@ -255,6 +256,8 @@ function drawSkeleton(ctx, J, color) {
 const tracker = new PoseTracker();
 let els = {};
 let smoothJ = null;        // smoothed player joints
+let playerChar = null;     // puppet-rig characters (fall back to stick figure)
+let instructorChar = null;
 let stars = 0;
 let song = SONGS[0];
 let paused = false;
@@ -306,13 +309,16 @@ function drawFrame(elapsed, move, beatIndex) {
   ictx.clearRect(0, 0, els.instructorCanvas.width, els.instructorCanvas.height);
   pctx.clearRect(0, 0, els.playerCanvas.width, els.playerCanvas.height);
 
-  // instructor
+  // instructor — puppet rig if loaded, else stick figure
   if (move) {
     const phase = (elapsed % beats.beatDur) / beats.beatDur;
     const J = instructorJoints(move, phase, beatIndex);
-    drawSkeleton(ictx, J, "#80ed99");
+    const iW = els.instructorCanvas.width, iH = els.instructorCanvas.height;
+    if (!(instructorChar && instructorChar.ready && instructorChar.draw(ictx, J, iW, iH))) {
+      drawSkeleton(ictx, J, "#80ed99");
+    }
   }
-  // player (smoothed)
+  // player (smoothed) — puppet rig if loaded, else stick figure
   const raw = playerJoints(det.lastLm);
   if (raw) {
     if (!smoothJ) smoothJ = raw;
@@ -326,7 +332,10 @@ function drawFrame(elapsed, move, beatIndex) {
         };
       }
     }
-    drawSkeleton(pctx, smoothJ, "#ffd166");
+    const pW = els.playerCanvas.width, pH = els.playerCanvas.height;
+    if (!(playerChar && playerChar.ready && playerChar.draw(pctx, smoothJ, pW, pH))) {
+      drawSkeleton(pctx, smoothJ, "#ffd166");
+    }
   }
 }
 
@@ -396,6 +405,9 @@ async function launch() {
   showOverlay("ovLoading");
   Sound.init(); Sound.resume();
   loadCalibration();
+  // kick off avatar loading (player = girl "you", instructor = boy)
+  if (!playerChar) playerChar = loadAvatar("girl");
+  if (!instructorChar) instructorChar = loadAvatar("boy");
   try {
     await tracker.init();
     await tracker.startCamera(els.camVideo);

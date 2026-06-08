@@ -143,6 +143,11 @@ It's an approximate beat detector — perfect sync isn't the goal, just
 - `pose.js` — on-device body tracking (MediaPipe Pose Landmarker + camera)
 - `camera-game.js` — the Camera Dance mode: choreography, instructor + player
   avatars, clap calibration, and gentle scoring (tunable `CFG` at the top)
+- `avatars.js` + `girl.svg` / `boy.svg` — the **2D puppet rig**: each character
+  SVG is split by its `part-*` groups and mapped onto the tracked joints via its
+  `anchor-*` markers. To reskin, just replace the `.svg` files (keep the same
+  `part-*`/`anchor-*` ids and `viewBox="0 0 400 700"`). Falls back to a stick
+  figure until the art loads.
 - `manifest.webmanifest`, `icon.svg`, `app-icon-*.png`, `sw.js` — make it
   installable & offline on Android **and** iOS (iOS needs the PNG icons)
 - `tools/gen-icons.mjs` — regenerates the PNG icons (`node tools/gen-icons.mjs`),
