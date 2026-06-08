@@ -1,5 +1,12 @@
-/* Tiny offline cache so Dance Now! works with no internet. */
-const CACHE = "dancenow-v5";
+/* Service worker for Dance Now! — offline support that stays fresh.
+
+   Strategy:
+   - HTML/navigations: network-first (always get the latest page when online,
+     fall back to cache when offline). This prevents stale "old version" loads.
+   - Other assets: cache-first, then network (and cache the result).
+   The install is resilient: one missing file can't block the update. */
+
+const CACHE = "dancenow-v6";
 const ASSETS = [
   "index.html",
   "app.js",
@@ -13,7 +20,10 @@ const ASSETS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+  // Resilient precache: don't let a single failed asset wedge the update.
+  e.waitUntil(
+    caches.open(CACHE).then((c) => Promise.allSettled(ASSETS.map((a) => c.add(a))))
+  );
   self.skipWaiting();
 });
 
@@ -27,7 +37,40 @@ self.addEventListener("activate", (e) => {
 });
 
 self.addEventListener("fetch", (e) => {
+  const req = e.request;
+  if (req.method !== "GET") return;
+
+  const accept = req.headers.get("accept") || "";
+  const isHtml = req.mode === "navigate" || accept.includes("text/html");
+
+  if (isHtml) {
+    // Network-first so the page is always up to date when online.
+    e.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(req, copy));
+          return res;
+        })
+        .catch(() => caches.match(req).then((hit) => hit || caches.match("index.html")))
+    );
+    return;
+  }
+
+  // Other assets: cache-first, then network (and cache it).
   e.respondWith(
-    caches.match(e.request).then((hit) => hit || fetch(e.request))
+    caches.match(req).then(
+      (hit) =>
+        hit ||
+        fetch(req)
+          .then((res) => {
+            if (res && res.status === 200 && res.type === "basic") {
+              const copy = res.clone();
+              caches.open(CACHE).then((c) => c.put(req, copy));
+            }
+            return res;
+          })
+          .catch(() => hit)
+    )
   );
 });
